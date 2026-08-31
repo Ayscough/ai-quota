@@ -1,0 +1,31 @@
+# Copy to ~/.config/ai-quota/config.toml and chmod 600.
+# Environment variables take precedence over these values.
+
+[deepseek]
+api_key = ""
+
+[mimo]
+cookie = ""
+
+[kimi]
+api_key = ""
+
+[glm]
+api_key = ""
+
+[openrouter]
+api_key = ""
+
+[openai]
+admin_key = ""
+org_id = ""
+
+[anthropic]
+admin_key = ""
+
+# These platforms do not expose one stable public balance API.
+# Set the *_BALANCE_URL environment variable only if you have verified
+# an official endpoint for your account/region.
+# Coding Plan / agent credentials use environment variables:
+# MINIMAX_CODING_API_KEY, GITHUB_COPILOT_TOKEN, GEMINI_OAUTH_FILE,
+# CODEX_AUTH_FILE, and CLAUDE_CONFIG_DIR.
