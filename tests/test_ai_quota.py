@@ -1,10 +1,13 @@
 import json
 import unittest
 from unittest.mock import patch
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from ai_quota.core import collect, render_json, render_text
 from ai_quota.providers.deepseek import parse_balance
 from ai_quota.providers.mimo import parse_mimo
+from ai_quota.config import load_config
 
 
 class TestParsing(unittest.TestCase):
@@ -30,6 +33,19 @@ class TestParsing(unittest.TestCase):
 
 
 class TestCore(unittest.TestCase):
+    def test_project_config_is_loaded_when_present(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "config.toml"
+            path.write_text("[deepseek]\napi_key = 'local-test'\n")
+            self.assertEqual(load_config(str(path))["deepseek"]["api_key"], "local-test")
+            old_cwd = Path.cwd()
+            try:
+                import os
+                os.chdir(directory)
+                self.assertEqual(load_config()["deepseek"]["api_key"], "local-test")
+            finally:
+                os.chdir(old_cwd)
+
     def test_one_provider_failure_does_not_hide_other_provider(self):
         class Good:
             key = "good"

@@ -85,15 +85,16 @@ export GITHUB_COPILOT_TOKEN='...'
 export GEMINI_OAUTH_FILE="$HOME/.gemini/oauth_creds.json"
 ```
 
-也可以使用本地配置文件：
+也可以把 `config.toml` 放在项目目录里：
 
 ```bash
-mkdir -p ~/.config/ai-quota
-cp config.example.toml ~/.config/ai-quota/config.toml
-chmod 600 ~/.config/ai-quota/config.toml
+cp config.example.toml config.toml
+$EDITOR config.toml
 ```
 
-不要将真实 API Key、Cookie 或 OAuth 文件提交到 Git。
+CLI 会自动读取这个文件，也会读取 `~/.config/ai-quota/config.toml`。
+
+凭据只留在你的机器上，`ai-quota` 只会把它们发给你正在查询的 Provider。
 
 ## Hermes Agent
 

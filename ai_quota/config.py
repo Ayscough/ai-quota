@@ -6,8 +6,12 @@ from pathlib import Path
 
 
 def load_config(path: str | None = None) -> dict:
-    config_path = Path(path or os.getenv("AI_QUOTA_CONFIG", "~/.config/ai-quota/config.toml")).expanduser()
-    if not config_path.exists():
+    if path or os.getenv("AI_QUOTA_CONFIG"):
+        candidates = [Path(path or os.environ["AI_QUOTA_CONFIG"]).expanduser()]
+    else:
+        candidates = [Path.cwd() / "config.toml", Path("~/.config/ai-quota/config.toml").expanduser()]
+    config_path = next((candidate for candidate in candidates if candidate.exists()), None)
+    if config_path is None:
         return {}
     with config_path.open("rb") as fh:
         return tomllib.load(fh)
