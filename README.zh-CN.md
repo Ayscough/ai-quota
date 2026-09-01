@@ -2,26 +2,26 @@
 
 # ai-quota
 
-Local-first CLI for checking AI API and coding-plan quotas.
+本地 AI API 和 Coding Plan 额度查询 CLI。
 
 [![Tests](https://github.com/Ayscough/ai-quota/actions/workflows/test.yml/badge.svg)](https://github.com/Ayscough/ai-quota/actions/workflows/test.yml)
 [![License](https://img.shields.io/github/license/Ayscough/ai-quota)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 
-[English](README.md) · [简体中文](README.zh-CN.md)
+[English](README.md) · 简体中文
 
 </div>
 
-## Features
+## 功能
 
-- Minimal terminal output
-- Structured JSON output
-- Independent provider failures
-- Per-provider timeout control
-- Environment-variable and TOML configuration
-- Works directly from Hermes Agent through the terminal
+- 简洁的终端输出
+- JSON 机器可读输出
+- Provider 独立失败处理
+- 单 Provider 超时控制
+- 支持环境变量和 TOML 配置
+- 可直接被 Hermes Agent 调用
 
-## Install
+## 安装
 
 ```bash
 git clone https://github.com/Ayscough/ai-quota.git
@@ -31,7 +31,7 @@ python3 -m venv .venv
 ln -sf "$PWD/.venv/bin/ai-quota" "$HOME/.local/bin/ai-quota"
 ```
 
-## Usage
+## 使用
 
 ```bash
 ai-quota
@@ -40,7 +40,7 @@ ai-quota --only deepseek
 ai-quota --timeout 5
 ```
 
-Example:
+示例：
 
 ```text
 AI Quota
@@ -51,7 +51,7 @@ MiMo        68%
 updated 20:58
 ```
 
-## Supported providers
+## 当前支持
 
 - DeepSeek
 - Xiaomi MiMo
@@ -67,9 +67,9 @@ updated 20:58
 - Gemini CLI
 - GitHub Copilot
 
-## Configuration
+## 配置
 
-Environment variables:
+环境变量：
 
 ```bash
 export DEEPSEEK_API_KEY='...'
@@ -85,7 +85,7 @@ export GITHUB_COPILOT_TOKEN='...'
 export GEMINI_OAUTH_FILE="$HOME/.gemini/oauth_creds.json"
 ```
 
-Or use a local file:
+也可以使用本地配置文件：
 
 ```bash
 mkdir -p ~/.config/ai-quota
@@ -93,23 +93,23 @@ cp config.example.toml ~/.config/ai-quota/config.toml
 chmod 600 ~/.config/ai-quota/config.toml
 ```
 
-Never commit real keys, cookies, or OAuth files.
+不要将真实 API Key、Cookie 或 OAuth 文件提交到 Git。
 
 ## Hermes Agent
 
-Hermes can call the CLI directly:
+Hermes 可以直接执行：
 
 ```bash
 ai-quota --json
 ```
 
-## Development
+## 开发
 
 ```bash
 .venv/bin/pip install pytest
 .venv/bin/pytest -q
 ```
 
-## License
+## 许可证
 
 MIT
