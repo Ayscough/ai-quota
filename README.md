@@ -70,71 +70,44 @@ cookie = "api-platform_serviceToken=...; userId=..."
 
 环境变量优先于 TOML。MiMo 使用网页登录 Cookie，Cookie 过期后需重新复制；程序不会自动登录或绕过登录。
 
-## 数据来源与支持边界
+## 当前支持
 
-### 稳定支持
+API：
 
-以下 Provider 使用公开文档中的官方 API，并且输出仅表示 API 返回的余额、额度或成本数据：
+- DeepSeek
+- Kimi / Moonshot
+- OpenRouter
+- OpenAI Organization Usage/Costs
+- Anthropic Usage & Cost
 
-- DeepSeek API：官方余额接口
-- Kimi/Moonshot API：官方余额接口
-- OpenRouter API：官方 Key usage/limit 接口
-- OpenAI API：官方 Organization Usage/Costs API；需要组织级 Admin Key
-- Anthropic API：官方 Usage & Cost Admin API；需要组织级 Admin Key
+Coding Plan / Agent：
 
-### 实验性支持
+- Xiaomi MiMo
+- Kimi Code
+- GLM / Z.ai Coding Plan
+- MiniMax Coding Plan
+- Codex
+- Claude Code
+- Gemini CLI
+- GitHub Copilot
 
-以下适配器可能依赖产品登录态、本地 CLI 凭据、Cookie，或平台没有承诺长期稳定的接口。它们默认不构成稳定 API 兼容承诺：
+每个 Provider 查询失败时，其他 Provider 继续执行。网络请求默认超时 8 秒。
 
-- Xiaomi MiMo Token Plan：控制台登录态；需要用户手动提供 Cookie
-- Kimi Code、GLM/Z.ai Coding Plan、MiniMax Coding Plan
-- Codex、Claude Code、Gemini CLI、GitHub Copilot
+## 暂未支持
 
-这些适配器只在用户明确配置凭据后运行。接口变化、账号类型差异或登录过期时，程序会返回错误，不会伪造额度。
+- Cursor
+- OpenCode Go
+- Alibaba Coding Plan
+- Alibaba Token Plan
+- Qwen Cloud / Qwen Code
+- Google Antigravity
+- Devin
+- Grok
+- Manus
 
-### 暂不承诺支持
+## 凭据安全
 
-Gemini API、MiniMax API、Qwen API、SiliconFlow API，以及 Cursor、OpenCode Go、Alibaba/Qwen Cloud、Antigravity、Devin、Grok、Manus 等产品，目前没有在本项目中承诺稳定的官方额度查询支持。
-
-原因可能包括：
-
-- 平台只在控制台展示额度，没有公开查询 API
-- 额度属于消费者订阅或 Coding Plan，而不是 API 账户余额
-- 接口是内部网页接口，随时可能变化
-- 需要浏览器自动化、设备授权或额外风控流程
-
-### 安全边界
-
-本项目不会自动登录、绕过验证码、上传 Cookie、读取无关浏览器数据，或把私有接口描述成官方公开 API。所有非公开接口适配器都必须保持 `experimental` 定位。
-
-单个 Provider 失败不会阻塞其他 Provider；网络请求默认每个 8 秒超时。
-
-## 支持矩阵
-
-| 产品 | 类型 | 状态 | 数据来源 |
-|---|---|---|---|
-| DeepSeek | API | stable | 官方 API |
-| Kimi/Moonshot | API | stable | 官方 API |
-| OpenRouter | API | stable | 官方 API |
-| OpenAI | API | stable | Organization Admin API |
-| Anthropic | API | stable | Usage & Cost Admin API |
-| MiMo | Coding Plan | experimental | 控制台登录态 |
-| Kimi Code | Coding Plan | experimental | 产品登录态/API |
-| GLM/Z.ai | Coding Plan | experimental | 产品登录态/API |
-| MiniMax | Coding Plan | experimental | 产品登录态/API，需账户验证 |
-| Codex | Subscription | experimental | 本地客户端登录态 |
-| Claude Code | Subscription | experimental | 本地客户端登录态 |
-| Gemini CLI | Subscription | experimental | 本地 CLI 登录态 |
-| GitHub Copilot | Subscription | experimental | GitHub 登录态/API |
-| Cursor | Coding Plan | planned | 尚未稳定接入 |
-| OpenCode Go | Subscription | planned | 尚未稳定接入 |
-| Alibaba/Qwen Cloud | Coding Plan | planned | 尚未稳定接入 |
-
-“stable”只表示接口来源公开且契约相对明确，不代表平台永不变更；“experimental”不保证所有账号、地区和套餐都可用。
-
-## 公开发布边界
-
-这是一个本地 CLI 和 Provider 适配实验项目，不是官方客户端，也不是账单系统。发布前请确认自己的凭据没有进入 Git 历史，并阅读各 Provider 的官方服务条款。
+凭据只从环境变量、本地配置文件或对应客户端的本地登录文件读取，不写入源码，不上传网络，不自动登录。
 
 ## Hermes
 
