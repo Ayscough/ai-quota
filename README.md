@@ -70,36 +70,71 @@ cookie = "api-platform_serviceToken=...; userId=..."
 
 环境变量优先于 TOML。MiMo 使用网页登录 Cookie，Cookie 过期后需重新复制；程序不会自动登录或绕过登录。
 
-## 数据来源与限制
+## 数据来源与支持边界
 
-- DeepSeek：官方 `GET https://api.deepseek.com/user/balance`
-- MiMo：控制台 API 的 balance 与 token-plan usage 接口；接口可能随官方控制台调整
-- Kimi 普通 API：`GET https://api.moonshot.ai/v1/users/me/balance`；Kimi Coding Plan：`GET https://api.kimi.com/coding/v1/usages`
-- GLM 普通 API：`/balance`；GLM Coding Plan：`/api/monitor/usage/quota/limit`
-- Claude：优先读取 Claude Code OAuth 凭据，请求 `/api/oauth/usage`，可以得到 5 小时和 7 天订阅窗口；不是 API 账单余额
-- Codex：读取 Codex OAuth 凭据，请求 ChatGPT backend 的 `/wham/usage`，得到 5 小时和 7 天窗口；该接口是 Codex 客户端使用的非公开产品接口
-- OpenRouter：官方 `GET https://openrouter.ai/api/v1/key`，查询 Key 额度与日/周/月使用量
-- OpenAI：Organization Admin API 的 `/v1/organization/costs`，查询近 30 天成本；普通 API Key 无法查询组织账单
-- Anthropic：Usage & Cost Admin API 的 `/v1/organizations/cost_report`，查询近 30 天成本；需要 Admin API Key
-- Gemini：Google AI Studio 的实时项目限额没有稳定的单一余额 API，因此未伪造接口；可通过 `GEMINI_QUOTA_URL` 接入已验证的官方配额端点
-- MiniMax、Qwen、SiliconFlow：当前没有统一稳定的公开余额接口，默认明确返回 `unsupported`；只有设置对应的 `*_BALANCE_URL` 后才请求
+### 稳定支持
+
+以下 Provider 使用公开文档中的官方 API，并且输出仅表示 API 返回的余额、额度或成本数据：
+
+- DeepSeek API：官方余额接口
+- Kimi/Moonshot API：官方余额接口
+- OpenRouter API：官方 Key usage/limit 接口
+- OpenAI API：官方 Organization Usage/Costs API；需要组织级 Admin Key
+- Anthropic API：官方 Usage & Cost Admin API；需要组织级 Admin Key
+
+### 实验性支持
+
+以下适配器可能依赖产品登录态、本地 CLI 凭据、Cookie，或平台没有承诺长期稳定的接口。它们默认不构成稳定 API 兼容承诺：
+
+- Xiaomi MiMo Token Plan：控制台登录态；需要用户手动提供 Cookie
+- Kimi Code、GLM/Z.ai Coding Plan、MiniMax Coding Plan
+- Codex、Claude Code、Gemini CLI、GitHub Copilot
+
+这些适配器只在用户明确配置凭据后运行。接口变化、账号类型差异或登录过期时，程序会返回错误，不会伪造额度。
+
+### 暂不承诺支持
+
+Gemini API、MiniMax API、Qwen API、SiliconFlow API，以及 Cursor、OpenCode Go、Alibaba/Qwen Cloud、Antigravity、Devin、Grok、Manus 等产品，目前没有在本项目中承诺稳定的官方额度查询支持。
+
+原因可能包括：
+
+- 平台只在控制台展示额度，没有公开查询 API
+- 额度属于消费者订阅或 Coding Plan，而不是 API 账户余额
+- 接口是内部网页接口，随时可能变化
+- 需要浏览器自动化、设备授权或额外风控流程
+
+### 安全边界
+
+本项目不会自动登录、绕过验证码、上传 Cookie、读取无关浏览器数据，或把私有接口描述成官方公开 API。所有非公开接口适配器都必须保持 `experimental` 定位。
 
 单个 Provider 失败不会阻塞其他 Provider；网络请求默认每个 8 秒超时。
 
-## 阶段化支持矩阵
+## 支持矩阵
 
-已实现或接入：
+| 产品 | 类型 | 状态 | 数据来源 |
+|---|---|---|---|
+| DeepSeek | API | stable | 官方 API |
+| Kimi/Moonshot | API | stable | 官方 API |
+| OpenRouter | API | stable | 官方 API |
+| OpenAI | API | stable | Organization Admin API |
+| Anthropic | API | stable | Usage & Cost Admin API |
+| MiMo | Coding Plan | experimental | 控制台登录态 |
+| Kimi Code | Coding Plan | experimental | 产品登录态/API |
+| GLM/Z.ai | Coding Plan | experimental | 产品登录态/API |
+| MiniMax | Coding Plan | experimental | 产品登录态/API，需账户验证 |
+| Codex | Subscription | experimental | 本地客户端登录态 |
+| Claude Code | Subscription | experimental | 本地客户端登录态 |
+| Gemini CLI | Subscription | experimental | 本地 CLI 登录态 |
+| GitHub Copilot | Subscription | experimental | GitHub 登录态/API |
+| Cursor | Coding Plan | planned | 尚未稳定接入 |
+| OpenCode Go | Subscription | planned | 尚未稳定接入 |
+| Alibaba/Qwen Cloud | Coding Plan | planned | 尚未稳定接入 |
 
-- API：DeepSeek、Kimi/Moonshot、OpenRouter、OpenAI Admin Costs、Anthropic Admin Costs
-- Coding Plan：Kimi Code、GLM/Z.ai Coding Plan、MiMo Token Plan、MiniMax Coding Plan
-- Agent 订阅：Codex、Claude Code、Gemini CLI、GitHub Copilot
-- 条件支持：Gemini、MiniMax、Qwen、SiliconFlow 可通过已验证的自定义官方 endpoint 接入
-
-实验性接口（Codex、Claude Code、Kimi Code、GLM/Z.ai、MiniMax Coding Plan、Gemini CLI、Copilot）可能因平台接口变化而失效。程序会返回错误，不会把失败伪装成 0% 或 100%。
+“stable”只表示接口来源公开且契约相对明确，不代表平台永不变更；“experimental”不保证所有账号、地区和套餐都可用。
 
 ## 公开发布边界
 
-本项目是本地 CLI，不会自动登录、绕过验证码、读取无关浏览器数据或上传凭据。网页 Cookie 和 OAuth 适配器只读取用户明确配置的本地凭据。没有稳定公开额度 API 的产品不会被标记为稳定支持。
+这是一个本地 CLI 和 Provider 适配实验项目，不是官方客户端，也不是账单系统。发布前请确认自己的凭据没有进入 Git 历史，并阅读各 Provider 的官方服务条款。
 
 ## Hermes
 
