@@ -34,7 +34,26 @@ def test_deepseek_parses_balance(monkeypatch):
 
 def test_mimo_missing_cookie_is_graceful():
     result = collect_results([MiMoProvider(cookie="")])["mimo"]
-    assert result["status"] == "error" and "cookie" in result["error"].lower()
+    assert result["status"] == "error" and "mimo_api_key" in result["error"].lower()
+
+
+def test_mimo_api_key_is_sent_without_cookie(monkeypatch):
+    requests = []
+    payloads = [
+        {"code": 0, "data": {"balance": "10.5", "currency": "CNY"}},
+        {"code": 0, "data": {"monthUsage": {"items": []}}},
+    ]
+
+    def fake_urlopen(request, timeout):
+        requests.append(request)
+        return response(payloads.pop(0))
+
+    monkeypatch.setattr("ai_quota.http.urlopen", fake_urlopen)
+    result = MiMoProvider(api_key="sk-test", cookie="ignored").fetch()
+    assert result["status"] == "ok"
+    assert requests[0].headers["Authorization"] == "Bearer sk-test"
+    assert requests[0].headers["Api-key"] == "sk-test"
+    assert "Cookie" not in requests[0].headers
 
 
 def test_collection_continues_after_provider_failure():

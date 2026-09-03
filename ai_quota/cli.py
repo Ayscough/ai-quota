@@ -11,7 +11,10 @@ from .providers import AnthropicProvider, ClaudeProvider, CodexProvider, Copilot
 def build_providers(config: dict, only: str | None = None) -> list[object]:
     specs = {
         "deepseek": lambda: DeepSeekProvider(provider_config(config, "deepseek", "api_key", "DEEPSEEK_API_KEY")),
-        "mimo": lambda: MiMoProvider(provider_config(config, "mimo", "cookie", "MIMO_COOKIE")),
+        "mimo": lambda: MiMoProvider(
+            api_key=provider_config(config, "mimo", "api_key", "MIMO_API_KEY"),
+            cookie=provider_config(config, "mimo", "cookie", "MIMO_COOKIE"),
+        ),
         "kimi": lambda: KimiProvider(provider_config(config, "kimi", "api_key", "MOONSHOT_API_KEY")),
         "glm": lambda: GLMProvider(provider_config(config, "glm", "api_key", "GLM_API_KEY")),
         "claude": ClaudeProvider,

@@ -73,6 +73,7 @@ Environment variables:
 
 ```bash
 export DEEPSEEK_API_KEY='...'
+export MIMO_API_KEY='...'
 export MIMO_COOKIE='...'
 export MOONSHOT_API_KEY='...'
 export GLM_API_KEY='...'

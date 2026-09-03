@@ -32,18 +32,24 @@ class MiMoProvider:
     key = "mimo"
     label = "MiMo"
 
-    def __init__(self, cookie: str | None = None, base_url: str | None = None):
+    def __init__(self, api_key: str | None = None, cookie: str | None = None, base_url: str | None = None):
+        self.api_key = api_key or os.getenv("MIMO_API_KEY")
         self.cookie = cookie or os.getenv("MIMO_COOKIE")
         self.base_url = (base_url or os.getenv("MIMO_API_URL") or "https://platform.xiaomimimo.com/api/v1").rstrip("/")
         if not self.base_url.startswith("https://"):
             raise ValueError("MIMO_API_URL must use HTTPS")
 
     def fetch(self, timeout: float = 8.0) -> dict:
-        if not self.cookie:
-            raise RuntimeError("MIMO_COOKIE not configured; paste a Cookie header")
-        headers = {"Accept": "application/json, text/plain, */*", "Cookie": self.cookie,
+        if not self.api_key and not self.cookie:
+            raise RuntimeError("MIMO_API_KEY or MIMO_COOKIE not configured")
+        headers = {"Accept": "application/json, text/plain, */*",
                    "Origin": "https://platform.xiaomimimo.com",
                    "Referer": "https://platform.xiaomimimo.com/#/console/balance"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+            headers["api-key"] = self.api_key
+        else:
+            headers["Cookie"] = self.cookie or ""
         balance = get_json(f"{self.base_url}/balance", headers, timeout)
         try:
             usage = get_json(f"{self.base_url}/tokenPlan/usage", headers, timeout)
