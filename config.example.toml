@@ -12,6 +12,7 @@ cookie = ""
 api_key = ""
 
 [glm]
+# GLM Coding Plan key. Ordinary GLM API balance is not queried.
 api_key = ""
 
 [openrouter]

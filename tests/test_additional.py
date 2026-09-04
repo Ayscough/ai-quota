@@ -16,11 +16,6 @@ def test_kimi_parses_balance():
     assert result["status"] == "ok" and result["balance"] == 12.5
 
 
-def test_glm_parses_balance_shapes():
-    result = parse_glm({"code": 200, "data": {"balance": "8.2", "currency": "CNY"}})
-    assert result["status"] == "ok" and result["balance"] == 8.2
-
-
 def test_kimi_coding_quota_shape():
     result = parse_kimi({"subType": "basic", "usage": {"limit": 100, "remaining": 80, "resetTime": 123}})
     assert result["remaining"] == 80 and result["used_percent"] == 20
@@ -86,3 +81,24 @@ def test_kimi_defaults_to_domestic_api_for_platform_kimi_com_keys(monkeypatch):
     assert result["status"] == "ok"
     assert result["currency"] == "CNY"
     assert seen == ["https://api.moonshot.cn/v1/users/me/balance"]
+
+
+def test_glm_uses_domestic_coding_plan_endpoint_and_raw_key(monkeypatch):
+    seen = []
+
+    class Response:
+        def read(self):
+            return b'{"success": true, "data": {"limits": [{"type": "CREDIT_LIMIT", "percentage": 25}]}}'
+        def __enter__(self): return self
+        def __exit__(self, *args): return None
+
+    def opener(request, timeout):
+        seen.append((request.full_url, dict(request.headers)))
+        return Response()
+
+    monkeypatch.setattr("ai_quota.http.urlopen", opener)
+    from ai_quota.providers.glm import GLMProvider
+    result = GLMProvider(api_key="glm-test").fetch()
+    assert result["status"] == "ok"
+    assert seen[0][0] == "https://open.bigmodel.cn/api/monitor/usage/quota/limit"
+    assert seen[0][1]["Authorization"] == "glm-test"
