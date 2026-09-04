@@ -1,12 +1,29 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import unquote
 from ..http import get_json
 
 
 def _percent(item: dict) -> int:
     used, limit = float(item.get("used", 0)), float(item.get("limit", 0))
     return max(0, min(100, round(100 - used / limit * 100))) if limit else 0
+
+
+def normalize_cookie(cookie: str) -> str:
+    """Normalize a Cookie header copied from browser developer tools."""
+    value = cookie.strip()
+    if value.lower().startswith("cookie:"):
+        value = value.split(":", 1)[1].strip()
+    parts = []
+    for part in value.split(";"):
+        if "=" not in part:
+            continue
+        name, item = (piece.strip() for piece in part.split("=", 1))
+        if len(item) >= 2 and item.startswith('"') and item.endswith('"'):
+            item = item[1:-1]
+        parts.append(f"{name}={unquote(item)}")
+    return "; ".join(parts)
 
 
 def parse_mimo(balance: dict, usage: dict | None = None) -> dict:
@@ -34,7 +51,7 @@ class MiMoProvider:
 
     def __init__(self, api_key: str | None = None, cookie: str | None = None, base_url: str | None = None):
         self.api_key = api_key or os.getenv("MIMO_API_KEY")
-        self.cookie = cookie or os.getenv("MIMO_COOKIE")
+        self.cookie = normalize_cookie(cookie or os.getenv("MIMO_COOKIE") or "")
         self.base_url = (base_url or os.getenv("MIMO_API_URL") or "https://platform.xiaomimimo.com/api/v1").rstrip("/")
         if not self.base_url.startswith("https://"):
             raise ValueError("MIMO_API_URL must use HTTPS")

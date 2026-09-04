@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from ai_quota.cli import collect_results, render_text
 from ai_quota.providers.deepseek import DeepSeekProvider
-from ai_quota.providers.mimo import MiMoProvider
+from ai_quota.providers.mimo import MiMoProvider, normalize_cookie
 
 
 class FakeResponse:
@@ -54,6 +54,11 @@ def test_mimo_api_key_is_sent_without_cookie(monkeypatch):
     assert requests[0].headers["Authorization"] == "Bearer sk-test"
     assert requests[0].headers["Api-key"] == "sk-test"
     assert "Cookie" not in requests[0].headers
+
+
+def test_mimo_cookie_is_normalized_for_browser_copy():
+    cookie = 'Cookie: api-platform_serviceToken="token%2Bvalue"; userId="12345"; api-platform_ph="x%2Fy"'
+    assert normalize_cookie(cookie) == "api-platform_serviceToken=token+value; userId=12345; api-platform_ph=x/y"
 
 
 def test_collection_continues_after_provider_failure():
