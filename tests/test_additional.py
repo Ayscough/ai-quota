@@ -8,6 +8,7 @@ from ai_quota.providers.anthropic import parse_anthropic_costs
 from ai_quota.providers.minimax import parse_minimax
 from ai_quota.providers.copilot import parse_copilot
 from ai_quota.providers.gemini import parse_gemini_quota
+from ai_quota.providers.kimi import KimiProvider
 
 
 def test_kimi_parses_balance():
@@ -65,3 +66,23 @@ def test_minimax_and_copilot_parse_remaining_quota():
 def test_gemini_parses_model_quota_fractions():
     result = parse_gemini_quota({"buckets": [{"modelId": "gemini", "remainingFraction": 0.68, "resetTime": "2026-08-31T00:00:00Z"}]})
     assert result["status"] == "ok" and result["windows"][0]["remaining_percent"] == 68
+
+
+def test_kimi_defaults_to_domestic_api_for_platform_kimi_com_keys(monkeypatch):
+    seen = []
+
+    class Response:
+        def read(self):
+            return b'{"code": 0, "data": {"available_balance": 1.0}}'
+        def __enter__(self): return self
+        def __exit__(self, *args): return None
+
+    def opener(request, timeout):
+        seen.append(request.full_url)
+        return Response()
+
+    monkeypatch.setattr("ai_quota.http.urlopen", opener)
+    result = KimiProvider(api_key="sk-test").fetch()
+    assert result["status"] == "ok"
+    assert result["currency"] == "CNY"
+    assert seen == ["https://api.moonshot.cn/v1/users/me/balance"]
