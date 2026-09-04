@@ -23,14 +23,30 @@ def _load_auth(path: Path) -> tuple[str, str | None]:
     if data.get("OPENAI_API_KEY"): return data["OPENAI_API_KEY"], None
     tokens = data.get("tokens") or {}
     token = tokens.get("access_token")
+    account_id = tokens.get("account_id")
+    if not token:
+        provider = (data.get("providers") or {}).get("openai-codex") or {}
+        tokens = provider.get("tokens") or {}
+        token = tokens.get("access_token")
+        account_id = tokens.get("account_id")
+    if not token:
+        pool = (data.get("credential_pool") or {}).get("openai-codex") or []
+        if pool:
+            token = pool[0].get("access_token")
+            account_id = pool[0].get("account_id")
     if not token: raise RuntimeError("Codex access token missing")
-    return token, tokens.get("account_id")
+    return token, account_id
 
 
 class CodexProvider:
     key, label = "codex", "Codex"
     def __init__(self, auth_path=None, base_url=None):
-        self.auth_path = Path(auth_path or os.getenv("CODEX_AUTH_FILE", "~/.codex/auth.json")).expanduser()
+        if auth_path or os.getenv("CODEX_AUTH_FILE"):
+            self.auth_path = Path(auth_path or os.environ["CODEX_AUTH_FILE"]).expanduser()
+        else:
+            codex_path = Path("~/.codex/auth.json").expanduser()
+            hermes_home = Path(os.getenv("HERMES_HOME", "~/.hermes")).expanduser()
+            self.auth_path = codex_path if codex_path.exists() else hermes_home / "auth.json"
         self.base_url = (base_url or os.getenv("CODEX_API_URL") or "https://chatgpt.com/backend-api").rstrip("/")
     def fetch(self, timeout=8.0):
         token, account_id = _load_auth(self.auth_path)

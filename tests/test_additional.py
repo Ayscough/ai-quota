@@ -9,6 +9,9 @@ from ai_quota.providers.minimax import parse_minimax
 from ai_quota.providers.copilot import parse_copilot
 from ai_quota.providers.gemini import parse_gemini_quota
 from ai_quota.providers.kimi import KimiProvider
+from ai_quota.providers.codex import _load_auth
+from pathlib import Path
+import json
 
 
 def test_kimi_parses_balance():
@@ -102,3 +105,11 @@ def test_glm_uses_domestic_coding_plan_endpoint_and_raw_key(monkeypatch):
     assert result["status"] == "ok"
     assert seen[0][0] == "https://open.bigmodel.cn/api/monitor/usage/quota/limit"
     assert seen[0][1]["Authorization"] == "glm-test"
+
+
+def test_codex_loads_hermes_openai_codex_credentials(tmp_path):
+    path = Path(tmp_path) / "auth.json"
+    path.write_text(json.dumps({"providers": {"openai-codex": {
+        "tokens": {"access_token": "hermes-token", "account_id": "acct"}
+    }}}))
+    assert _load_auth(path) == ("hermes-token", "acct")
