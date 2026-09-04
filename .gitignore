@@ -3,10 +3,27 @@ __pycache__/
 .pytest_cache/
 .venv/
 .env
+.env.*
+!.env.example
 config.toml
+config.local.toml
+*.local.toml
+*.secret.toml
 *.egg-info/
 dist/
 build/
 .coverage
 htmlcov/
 .DS_Store
+
+# Local credentials and private material
+credentials.json
+auth.json
+*_credentials.json
+*_auth.json
+cookies.txt
+cookies*.txt
+*.pem
+*.key
+*.p12
+*.log
