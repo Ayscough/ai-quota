@@ -97,13 +97,24 @@ CLI 会自动读取这个文件，也会读取 `~/.config/ai-quota/config.toml`�
 
 凭据只留在你的机器上，`ai-quota` 只会把它们发给你正在查询的 Provider。
 
-## Hermes Agent
+## Hermes Plugin
 
-Hermes 可以直接执行：
+从 GitHub 一键安装 Hermes 插件：
 
 ```bash
-ai-quota --json
+hermes plugins install Ayscough/ai-quota --enable
 ```
+
+然后可以使用：
+
+```text
+/quota
+/quota --only codex
+```
+
+Hermes 同时会获得 `get_ai_quota` 工具。当你要求查看 AI 平台额度时，
+Hermes 可以自动调用它。插件在本地运行 `ai-quota --json`，不会修改 Hermes
+核心文件。
 
 ## 开发
 

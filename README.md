@@ -97,13 +97,24 @@ The CLI reads this file automatically. It also looks for `~/.config/ai-quota/con
 
 Your keys stay on your machine. `ai-quota` only sends them to the provider you query.
 
-## Hermes Agent
+## Hermes Plugin
 
-Hermes can call the CLI directly:
+Install the plugin directly from GitHub:
 
 ```bash
-ai-quota --json
+hermes plugins install Ayscough/ai-quota --enable
 ```
+
+Then use either:
+
+```text
+/quota
+/quota --only codex
+```
+
+Hermes also gets the `get_ai_quota` tool and can call it when you ask to check
+AI provider balances. The plugin runs `ai-quota --json` locally and does not
+modify Hermes core files.
 
 ## Development
 
