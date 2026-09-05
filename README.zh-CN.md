@@ -1,57 +1,39 @@
 <div align="center">
 
-# ai-quota
+# Hermes Quota
 
-本地 AI API 和 Coding Plan 额度查询 CLI。
+用于 Hermes Agent 的 AI 平台余额和 Coding Plan 额度查询插件。
 
-[![Tests](https://github.com/Ayscough/ai-quota/actions/workflows/test.yml/badge.svg)](https://github.com/Ayscough/ai-quota/actions/workflows/test.yml)
-[![License](https://img.shields.io/github/license/Ayscough/ai-quota)](LICENSE)
+[![Tests](https://github.com/Ayscough/hermes-quota/actions/workflows/test.yml/badge.svg)](https://github.com/Ayscough/hermes-quota/actions/workflows/test.yml)
+[![License](https://img.shields.io/github/license/Ayscough/hermes-quota)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 
 [English](README.md) · 简体中文
 
 </div>
 
-## 功能
+## Hermes 插件
 
-- 简洁的终端输出
-- JSON 机器可读输出
-- Provider 独立失败处理
-- 单 Provider 超时控制
-- 支持环境变量和 TOML 配置
-- 可直接被 Hermes Agent 调用
-
-## 安装
+从 GitHub 一键安装：
 
 ```bash
-git clone https://github.com/Ayscough/ai-quota.git
-cd ai-quota
-python3 -m venv .venv
-.venv/bin/pip install -e .
-ln -sf "$PWD/.venv/bin/ai-quota" "$HOME/.local/bin/ai-quota"
+hermes plugins install Ayscough/hermes-quota --enable
 ```
 
-## 使用
-
-```bash
-ai-quota
-ai-quota --json
-ai-quota --only deepseek
-ai-quota --timeout 5
-```
-
-示例：
+重启 Hermes 后使用：
 
 ```text
-AI Quota
-────────────────
-DeepSeek    ¥32.41
-MiMo        68%
-────────────────
-updated 20:58
+/quota
+/quota --only codex
 ```
 
-## 当前支持
+插件同时提供 `get_ai_quota` 工具。当你要求查看 AI 平台额度时，Hermes
+可以自动调用它。
+
+`/quota` 会自动读取当前 Hermes profile 使用的 Provider，将它优先显示，
+并在下面显示其他已配置的平台。Coding Plan 和订阅窗口会以剩余额度进度条显示。
+
+## 支持的平台
 
 - DeepSeek
 - Xiaomi MiMo
@@ -69,52 +51,37 @@ updated 20:58
 
 ## 配置
 
-环境变量：
-
-```bash
-export DEEPSEEK_API_KEY='...'
-export MIMO_API_KEY='...'
-export MIMO_COOKIE='...'
-export KIMI_API_KEY='...'
-export GLM_API_KEY='...'
-export OPENROUTER_API_KEY='...'
-export OPENAI_ADMIN_KEY='...'
-export OPENAI_ORG_ID='...'
-export ANTHROPIC_ADMIN_KEY='...'
-export MINIMAX_CODING_API_KEY='...'
-export GITHUB_COPILOT_TOKEN='...'
-export GEMINI_OAUTH_FILE="$HOME/.gemini/oauth_creds.json"
-```
-
-也可以把 `config.toml` 放在项目目录里：
+通过环境变量或本地 TOML 文件配置凭据：
 
 ```bash
 cp config.example.toml config.toml
 $EDITOR config.toml
+chmod 600 config.toml
 ```
 
-CLI 会自动读取这个文件，也会读取 `~/.config/ai-quota/config.toml`。
+CLI 会自动读取当前目录的 `config.toml` 和
+`~/.config/ai-quota/config.toml`。Hermes OAuth 凭据使用正常的 Hermes
+凭据目录，包括 `$HERMES_HOME/auth.json` 中的 Codex 凭据。
 
-凭据只留在你的机器上，`ai-quota` 只会把它们发给你正在查询的 Provider。
+凭据只保留在本机，并只发送给正在查询的平台。
 
-## Hermes Plugin
+## 独立 CLI
 
-从 GitHub 一键安装 Hermes 插件：
+底层 CLI 也可以独立安装和使用：
 
 ```bash
-hermes plugins install Ayscough/ai-quota --enable
+git clone https://github.com/Ayscough/hermes-quota.git
+cd hermes-quota
+python3 -m venv .venv
+.venv/bin/pip install -e .
+ln -sf "$PWD/.venv/bin/ai-quota" "$HOME/.local/bin/ai-quota"
 ```
 
-然后可以使用：
-
-```text
-/quota
-/quota --only codex
+```bash
+ai-quota
+ai-quota --json
+ai-quota --only codex
 ```
-
-Hermes 同时会获得 `get_ai_quota` 工具。当你要求查看 AI 平台额度时，
-Hermes 可以自动调用它。插件在本地运行 `ai-quota --json`，不会修改 Hermes
-核心文件。
 
 ## 开发
 

@@ -1,6 +1,6 @@
-name: ai-quota
+name: hermes-quota
 version: "1.0.0"
-description: "Query configured AI provider balances and coding-plan quotas from Hermes."
+description: "Hermes Agent plugin for AI provider balances and coding-plan quotas."
 author: Ayscough
 license: MIT
-homepage: https://github.com/Ayscough/ai-quota
+homepage: https://github.com/Ayscough/hermes-quota
